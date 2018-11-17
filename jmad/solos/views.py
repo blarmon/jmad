@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from solos.models import Solo
+from django.views.generic.detail import DetailView
 
 
 # Create your views here.
@@ -20,3 +21,6 @@ def index(request):
         context['solos'] = solos_queryset
 
     return render_to_response('solos/index.html', context)
+
+class SoloDetailView(DetailView):
+    pass
