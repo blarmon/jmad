@@ -27,18 +27,36 @@ class StudentTestCase(LiveServerTestCase):
 
         brand_element = self.browser.find_element_by_css_selector('.navbar-brand')
         self.assertEqual('JMAD', brand_element.text)
-        self.fail('incomplete test')
 
         # He sees the inputs of the search form, including
         # labels and placeholders
 
+        instrument_input = self.browser.find_element_by_css_selector('input#jmad-instrument')
+        self.assertIsNotNone(self.browser.find_element_by_css_selector('label[for="jmad-instrument"]'))
+        self.assertEqual(instrument_input.get_attribute('placeholder'), 'i.e. trumpet')
+        instrument_input = self.browser.find_element_by_css_selector('input#jmad-artist')
+        self.assertIsNotNone(self.browser.find_element_by_css_selector('label[for="jmad-artist"]'))
+        self.assertEqual(instrument_input.get_attribute('placeholder'), 'i.e. Davis')
+
         # He types in the name of his instrument and submits
         #  it.
 
-        # He sees too many search results....
+        instrument_input.send_keys('saxophone')
+        self.browser.find_element_by_css_selector('form button').click()
 
+        # He sees too many search results....
         # ...so he add an artist to his search query and
         # gets a more manageable list.
+
+        search_results = self.browser.find_elements_by_css_selector('.jmad-search-result')
+        self.assertGreater(len(search_results), 2)
+
+        second_artist_input = self.browser.find_element_by_css_selector('input#jmad-artist')
+        second_artist_input.send_keys('Cannonball Adderly')
+        self.browser.find_element_by_css_selector('form button').click()
+        second_search_results = self.browser.find_elements_by_css_selector('.jmad-search-result')
+        self.assertEqual(len(second_search_results), 2)
+        self.fail('incomplete test')
 
         # He clicks on a search result.
 
