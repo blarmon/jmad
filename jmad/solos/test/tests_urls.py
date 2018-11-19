@@ -19,7 +19,7 @@ class SolosURLsTestCase(TestCase):
         correct view function
         """
 
-        solo_detail = resolve('solos/1/')
+        solo_detail = resolve('/solos/1/')
 
         self.assertEqual(solo_detail.func.__name__, 'SoloDetailView')
         self.assertEqual(solo_detail.kwargs['pk'], '1')
