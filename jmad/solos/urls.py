@@ -6,4 +6,5 @@ from solos import views
 
 urlpatterns = [
     path('', views.index),
+    path('solos/<int:pk>/', views.SoloDetailView.as_view()),
 ]
