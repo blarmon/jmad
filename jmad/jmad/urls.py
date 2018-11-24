@@ -18,6 +18,7 @@ from django.urls import path, include
 from solos import views
 
 urlpatterns = [
-    path('', include('solos.urls')),
+    path('recordings/<album>/<track>/<artist>/', views.solo_detail, name='solo_detail_view'),
+    path('', views.index),
     path('admin/', admin.site.urls),
 ]

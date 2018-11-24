@@ -3,6 +3,7 @@ from django.test import LiveServerTestCase
 from selenium import webdriver
 
 from solos.models import Solo
+from albums.models import Album, Track
 
 
 class StudentTestCase(LiveServerTestCase):
@@ -11,12 +12,32 @@ class StudentTestCase(LiveServerTestCase):
         self.browser = webdriver.Chrome('C:\Program Files (x86)\Google\ChromeDriver\chromedriver.exe')
         self.browser.implicitly_wait(2)
 
-        self.solo1 = Solo.objects.create(instrument='saxophone', artist='John Coltrane', track='My Favorite Things', album='My Favorite Things')
-        self.solo2 = Solo.objects.create(instrument='saxophone', artist='Cannonball Adderley', track='All Blues', album='Kind of Blue', start_time='2:06', end_time='4:01')
-        self.solo3 = Solo.objects.create(instrument='saxophone', artist='Cannonball Adderley', track='Waltz for Debby', album='Know What I Mean?')
+        self.album1 = Album.objects.create(name='My Favorite Things', slug='my-favorite-things')
+        self.track1 = Track.objects.create(name='My Favorite Things', slug='my-favorite-things', album=self.album1)
+        self.solo1 = Solo.objects.create(instrument='saxophone', artist='John Coltrane', track=self.track1,
+                                         slug='john-coltrane')
+
+        self.album2 = Album.objects.create(name='Kind of Blue', slug='kind-of-blue')
+        self.track2 = Track.objects.create(name='All Blues', slug='all-blues', album=self.album2, track_number=4)
+        self.solo2 = Solo.objects.create(instrument='saxophone', artist='Cannonball Adderley', track=self.track2,
+                                         start_time='4:05', end_time='6:04', slug='cannonball-adderley')
+
+        self.album3 = Album.objects.create(name='Know What I Mean?', slug='know-what-i-mean')
+        self.track3 = Track.objects.create(name='Waltz for Debby', slug='waltz-for-debby', album=self.album3)
+        self.solo3 = Solo.objects.create(instrument='saxophone', artist='Cannonball Adderley', track=self.track3,
+                                         slug='cannonball-adderley')
+
+        self.solo4 = Solo.objects.create(instrument='trumpet', artist='Miles Davis', track=self.track2,
+                                         slug='miles-davis')
+
+        self.track4 = Track.objects.create(name='Freddie Freeloader', album=self.album2)
+        self.track5 = Track.objects.create(name='Blue in Green', album=self.album2)
 
     def tearDown(self):
         self.browser.quit()
+
+    def find_search_results(self):
+        return self.browser.find_elements_by_css_selector('.jmad-search-result a')
 
     def test_student_find_solos(self):
         """
@@ -58,29 +79,15 @@ class StudentTestCase(LiveServerTestCase):
         # He clicks on a search result.
         second_search_results[0].click()
 
-        # The solo page has the title, artist and album for this particular solo.
-        self.assertEqual(self.browser.current_url, '{}/solos/2/'.format(self.live_server_url))
-
-        self.assertEqual(self.browser.find_element_by_css_selector('#jmad-artist').text, 'Cannonball Adderley')
-        self.assertEqual(self.browser.find_element_by_css_selector('#jmad-track').text, 'All Blues')
-        self.assertEqual(self.browser.find_element_by_css_selector('#jmad-album').text, 'Kind of Blue')
-
-
-        # He also sees the start time and end time of the solo.
-        self.assertEqual(self.browser.find_element_by_css_selector('#jmad-start-time').text, '2:06')
-        self.assertEqual(self.browser.find_element_by_css_selector('#jmad-end-time').text, '4:01')
-
         # On the solo page...
-        self.assertEqual(self.browser.current_url, self.live_server_url + '/recordings/kind-of-blue/all-blues/cannonball-adderley/')
+        self.assertEqual(self.browser.current_url,
+            self.live_server_url + '/recordings/kind-of-blue/all-blues/cannonball-adderley/')
 
         # he sees the artist...
         self.assertEqual(self.browser.find_element_by_css_selector('#jmad-artist').text, 'Cannonball Adderley')
 
         # the track title (with a count of solos)...
-        self.assertEqual(self.browser.find_element_by_css_selector('#jmad-track').text, 'All Blues [2 solos]')
+        self.assertEqual( self.browser.find_element_by_css_selector('#jmad-track').text, 'All Blues [2 solos]')
 
-        # and the album titles (with track count) for this solo.
+        # and the album title (with track count) for this solo.
         self.assertEqual(self.browser.find_element_by_css_selector('#jmad-album').text, 'Kind of Blue [3 tracks]')
-
-    def find_search_results(self):
-        return self.browser.find_elements_by_css_selector('.jmad-search-result a')
