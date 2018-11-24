@@ -1,4 +1,5 @@
 from django.test import LiveServerTestCase
+from django.contrib.auth import get_user_model
 
 from selenium import webdriver
 
@@ -32,6 +33,10 @@ class StudentTestCase(LiveServerTestCase):
 
         self.track4 = Track.objects.create(name='Freddie Freeloader', album=self.album2)
         self.track5 = Track.objects.create(name='Blue in Green', album=self.album2)
+
+        self.admin_user = get_user_model().objects.create_superuser(username='bill', email='bill@example.com',
+                                                                    password='password')
+
 
     def tearDown(self):
         self.browser.quit()
@@ -96,42 +101,57 @@ class StudentTestCase(LiveServerTestCase):
         """
         Tests that a 'staff' user can access the admin and add Albums, Tracks, and Solos
         """
-        # Bill would like to add a record and a number of solos o JMAD.  He visits the admin site.
-        admin_root = self.browser.get(self.live_server_url + '/admin')
+        # Bill would like to add a record and a number of solos to JMAD. He visits the admin site
+        admin_root = self.browser.get(self.live_server_url + '/admin/')
 
-        # He can tell he's in the right place because of the title of the page.
+        # He can tell he's in the right place because of the title of the page
         self.assertEqual(self.browser.title, 'Log in | Django site admin')
-        self.fail('incomplete test')
 
         # He enters his username and password and submits the form to log in
+        login_form = self.browser.find_element_by_id('login-form')
+        login_form.find_element_by_name('username').send_keys('bill')
+
+        login_form.find_element_by_name('password') .send_keys('password')
+        login_form.find_element_by_css_selector('.submit-row input').click()
 
         # He sees links to Albums, Tracks, and Solos
+        albums_links = self.browser .find_elements_by_link_text('Albums')
+
+        self.assertEqual(albums_links[0].get_attribute('href'), self.live_server_url + '/admin/albums/album/')
+
+        self.assertEqual(self.browser.find_element_by_link_text('Tracks').get_attribute('href'),
+                         self.live_server_url + '/admin/albums/track/')
+
+        solos_links = self.browser.find_elements_by_link_text('Solos')
+        self.assertEqual(solos_links[0].get_attribute('href'), self.live_server_url + '/admin/solos/solo/')
+
+        self.fail('incomeplete testo boyo')
 
         # He clicks on Albums and sees all of the Albums that have been added so far
 
-        # Going back to the home page, he clicks the Tracks link and sees the Tracks that have been Added.
-        # They're ordered first by Album, then by track number.
+        # Going back to the home page, he clicks the Tracks link and sees the Tracks that have been added. They're
+        # ordered first by Album, then by track number.
 
-        # He addsa track to an album that already exists
+        # He adds a track to an album that already exists
 
         # He adds another track, this time on an album that is not in JMAD yet
 
         # After adding the basic Track info, he clicks on the plus sign to add a new album.
 
-        # The focus shifts to a newly opened window, where he sees and Album form.
+        # The focus shifts to the newly opened window, where he sees an Album form
 
         # After creating the Album, he goes back to finish the Track
 
         # He goes back to the root of the admin site and clicks on 'Solos'
 
-        # He sees solos listed by Album, then Track, then start time
+        # He sees Solos listed by Album, then Track, then start time
 
-        # He adds a Solo to a Track that already exists.
+        # He adds a Solo to a Track that already exists
 
-        # He then adds a Solo for which the Track and Album do not exist yet
+        # He then adds a Solo for which the Track and Album do not yet exist
 
-        # He then adds a Track from the Solo page
+        # He adds a Track from the Solo page
 
-        # He adds an album from the Track popup
+        # He adds an Album from the Track popup
 
         # He finishes up both parent objects, and saves the Solo
