@@ -3,6 +3,7 @@ from django.test import TestCase
 from solos.models import Solo
 from albums.models import Album, Track
 
+
 class SoloModelTestCase(TestCase):
 
     def setUp(self):
@@ -23,7 +24,6 @@ class SoloModelTestCase(TestCase):
             track=self.track,
             artist='Oscar Peterson',
             instrument='piano',
-            album='At the Stratford Shakespearean Festival',
             start_time='1:24',
             end_time='4:06',
             slug='oscar-peterson'
@@ -38,9 +38,11 @@ class SoloModelTestCase(TestCase):
 
     def test_get_absolute_url(self):
         """
-        Test that we can build a URL for the solo
+        Test that we can build a URL for a solo
         """
-        self.assertEqual(self.solo.get_absolute_url(), '/recordings/at-the-stratford-shakespearean-festival/falling-in-love-with-love/oscar-peterson/')
+        self.assertEqual(
+            self.solo.get_absolute_url(),
+            '/recordings/at-the-stratford-shakespearean-festival/falling-in-love-with-love/oscar-peterson/')
 
     def test_get_duration(self):
         """
